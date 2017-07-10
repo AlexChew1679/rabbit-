@@ -160,3 +160,88 @@ update tasks_controller.rb
                           end
 
                         end
+
+
+create edit.html.erb
+
+                          <h1> Edit Task </h1>
+
+                          <%= render 'form' %>
+                          <%= link_to "Back", root_path  %>
+
+
+rails g model category name:string
+rails db:migrate
+rails g migration add_category_id_to_tasks category_id:integer
+rails db:migrate
+
+
+task.rb
+                  class Task < ApplicationRecord
+                    belongs_to :category
+                  end
+
+category.rb
+                  class Category < ApplicationRecord
+                    has_many :tasks
+                  end
+
+modify _form.html.erb
+                <%= simple_form_for(@task, html: {class: 'form-horizontal'}) do |f| %>
+                  <%= f.collection_select :category_id, Category.all, :id, :name, { prompt: "Choose a Category"} %>
+                  <%= f.input :title, label: "task title" %>
+                  <%= f.input :description, label: "task description" %>
+                  <%= f.input :company, label: "your company" %>
+                  <%= f.input :url, label: "link to task" %>
+                  <br/>
+                  <%= f.button :submit  %>
+                <% end %>
+
+modify application.html.erb
+
+
+                  <!DOCTYPE html>
+                  <html>
+                  <head>
+                  <title>TaskRabbit</title>
+                  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true  %>
+                  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true  %>
+                  <%= csrf_meta_tags  %>
+                  </head>
+                  <body>
+                  <nav class="navbar navbar-default">
+                    <div class="container">
+                      <div class="navbar-brand">TaskRabbit</div>
+                      <ul class="nav navbar-nav">
+                        <li>
+                          <%= link_to "All Tasks", root_path %>
+                        </li>
+                        <% Category.all.each do |category|				 %>
+                          <li>
+                            <%= link_to category.name, tasks_path(category: category.name) %>
+                          </li>
+                        <% end %>
+                      </ul>
+                      <%= link_to "New Task", new_task_path, class: "navbar-text navbar-right navbar-link" %>
+                    </div>
+                  </nav>
+                  <div class="container">
+                    <div class="col-md-8 col-md-offset-2">
+                      <%= yield %>
+                    </div>
+                  </div>
+                  </body>
+
+                  </html>
+
+
+modify tasks_controller.rb at index only  (this will separate the tasks according to category)
+
+              def index
+                if params[:category].blank?
+                  @tasks = Task.all.order("created_at DESC")
+                else
+                  @category_id = Category.find_by(name: params[:category]).id
+                  @tasks = Task.where(category_id: @category_id).order("created_at DESC")
+                end
+              end
