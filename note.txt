@@ -1,0 +1,162 @@
+rails g model task title:string description:text company:string url:string
+rails g controller tasks
+rails db:migrate
+
+routes.rb
+
+                          resources :tasks
+                          root 'tasks#index'
+
+install gem simple_form and bootstrap-sass
+
+bundle install
+
+rename application.css to application.css.scss
+paste this to:
+            @import "bootstrap-sprockets";
+            @import "bootstrap";
+
+paste this at application.js
+              //= require bootstrap-sprockets
+
+rails generate simple_form:install --bootstrap
+
+
+update tasks_controller.rb
+
+                            class TasksController < ApplicationController
+                              before_action :find_task, only: [:show, :edit, :update, :destroy]
+
+
+                              def index
+                              end
+
+                              def show
+                              end
+
+                              def new
+                                @task = Task.new
+                              end
+
+                              def create
+                                @task = Task.new(tasks_params)
+
+                                if @task.save
+                                  redirect_to @task
+                                else
+                                  render 'new'
+                                end
+                              end
+
+                              def edit
+                              end
+
+                              def update
+                              end
+
+                              def destroy
+                              end
+
+
+                              private
+
+                              def tasks_params
+                                params.require(:task).permit(:title, :description, :company, :url)
+                              end
+
+
+                              def find_task
+                                @task = Task.find(params[:id])
+                              end
+
+                            end
+
+create _form.html.erb
+                            <%= simple_form_for(@task, html: {class: 'form-horizontal'}) do |f| %>
+                              <%= f.input :title, label: "task title" %>
+                              <%= f.input :description, label: "task description" %>
+                              <%= f.input :company, label: "your company" %>
+                              <%= f.input :url, label: "link to task" %>
+                              <br/>
+                              <%= f.button :submit  %>
+                            <% end %>
+
+create show.html.erb
+                            <h1> <%= @task.title %> </h1>
+                            <p>
+                              <%= @task.description  %>
+                            </p>
+                            <p>
+                              <%= @task.company  %>
+                            </p>
+                            <%= link_to "Home" , root_path  %>
+
+
+modify index.html.erb
+                            <% @tasks.each do |task|  %>
+                                <h2>
+                                  <%= task.title%>
+                                </h2>
+
+                                <p>
+                                  <%= task.company%>
+                                </p>
+                                <%end%>
+                            <%= link_to "New Task", new_task_path %>
+
+update tasks_controller.rb
+
+                        class TasksController <  ApplicationController
+                          before_action :find_task, only: [:show, :edit, :update, :destroy]
+
+
+                          def index
+                            @tasks = Task.all.order("created_at DESC")
+                          end
+
+                          def show
+                          end
+
+                          def new
+                            @task = Task.new
+                          end
+
+                          def create
+                            @task = Task.new(tasks_params)
+
+                            if @task.save
+                              redirect_to @task
+                            else
+                              render 'new'
+                            end
+                          end
+
+                          def edit
+                          end
+
+                          def update
+                            if @task.update(tasks_params)
+                              redirect_to @task
+                            else
+                              render 'edit'
+                            end
+                          end
+
+                          def destroy
+                            @task.destroy
+                            redirect_to root_path
+                          end
+
+
+                          private
+
+                          def tasks_params
+                            params.require(:task).permit(:title, :description, :company, :url)
+                          end
+
+
+                          def find_task
+                            @task = Task.find(params[:id])
+                          end
+
+                        end
