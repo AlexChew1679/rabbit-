@@ -245,3 +245,8 @@ modify tasks_controller.rb at index only  (this will separate the tasks accordin
                   @tasks = Task.where(category_id: @category_id).order("created_at DESC")
                 end
               end
+
+  NOTE: go to rails console to build the category..
+  Category
+  Category.connection
+  Category.create(name: "Handy Man") 
